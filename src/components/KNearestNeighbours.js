@@ -26,7 +26,7 @@ const shuffleArray = arr => {
 export const KNearestNeighbours = ({ data }) => {
   const seperationSize = 0.7 * data.length;
 
-  const shuffledData = shuffleArray(data);
+    const shuffledData = shuffleArray(data);
 
   let keys = Object.keys(shuffledData[0]);
   let keysHead = keys.slice(0, keys.length - 1);
@@ -43,7 +43,7 @@ export const KNearestNeighbours = ({ data }) => {
   let testSetY = y.slice(seperationSize);
 
   let benchmarkStart = performance.now();
-  let knnModel = new KNN(trainingSetX, trainingSetY, { k: 5 });
+  let knnModel = new KNN(trainingSetX, trainingSetY, { k: 3 });
   let benchmarkEnd = performance.now();
 
   const result = knnModel.predict(testSetX);
@@ -64,44 +64,71 @@ export const KNearestNeighbours = ({ data }) => {
       }),
       {}
     ),
-    [keysTail]: types[result[i]]
+    [keysTail]: types[result[i]],
+    isPredictionCorrect: result[i] === testSetY[i]
   }));
+  console.log(chartData);
 
-  let subChartsIndices = keysHead.map((_, i) => i).filter(i => i % 2 === 0);
+  let subChartsIndices = keysHead
+    .map(i => keysHead.map(j => [i, j]))
+    .reduce((a, b) => [...a, ...b])
+    .filter(el => el[0] !== el[1]);
 
   return (
-    <AutoSizer>
+    <AutoSizer style={{ width: "100%" }}>
       {({ height, width }) => (
         <div>
-          {subChartsIndices.map(i => {
-            const labels = [keysHead[i], keysHead[(i + 1) % keysHead.length]];
+          {subChartsIndices.map(ch => {
             return (
-              <ScatterChart
-                key={`${labels[0]}-${labels[1]}`}
-                data={chartData}
-                width={width}
-                height={height / subChartsIndices.length}
-                margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
-              >
-                <CartesianGrid />
-                <XAxis dataKey={labels[0]} type="number" name={labels[0]} />
-                <YAxis dataKey={labels[1]} type="number" name={labels[1]} />
-                {types.map((type, i) => (
-                  <Scatter
-                    key={type}
-                    data={chartData.filter(el => el.type === type)}
-                    fill={colors[i]}
+              <>
+                <h2 style={{ textAlign: "center" }}>{`${ch[1]} (y) vs. ${
+                  ch[0]
+                } (x)`}</h2>
+                <ScatterChart
+                  key={`${ch[0]}-${ch[1]}`}
+                  data={chartData}
+                  width={width}
+                  height={300}
+                  margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
+                >
+                  <CartesianGrid />
+                  <XAxis dataKey={ch[0]} type="number" name={ch[0]} />
+                  <YAxis dataKey={ch[1]} type="number" name={ch[1]} />
+
+                  {[
+                    ...types.map((type, i) => ({
+                      key: `${ch[0]}-${ch[1]}-expected-${type}`,
+                      fill: colors[i],
+                      shape: "wye",
+                      type,
+                      data: chartData.filter(
+                        (_, j) =>
+                          types[testSetY[j]] === type &&
+                          result[j] !== testSetY[j]
+                      )
+                    })),
+                    ...types.map((type, i) => ({
+                      key: `${ch[0]}-${ch[1]}-results-${type}`,
+                      fill: colors[i],
+                      shape: "triangle",
+                      type,
+                      data: chartData.filter(el => el[keysTail] === type)
+                    }))
+                  ]
+                    .filter(serie => serie.data.length > 0)
+                    .map(serie => (
+                      <Scatter {...serie} />
+                    ))}
+                  <Tooltip cursor={{ strokeDasharray: "3 3" }} />
+                  <Legend
+                    payload={types.map((type, i) => ({
+                      value: type,
+                      type: "circle",
+                      color: colors[i]
+                    }))}
                   />
-                ))}
-                <Tooltip cursor={{ strokeDasharray: "3 3" }} />
-                <Legend
-                  payload={types.map((type, i) => ({
-                    value: type,
-                    type: "circle",
-                    color: colors[i]
-                  }))}
-                />
-              </ScatterChart>
+                </ScatterChart>
+              </>
             );
           })}
           <div
