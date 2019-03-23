@@ -42,17 +42,19 @@ export const KNearestNeighbours = ({ data }) => {
   let testSetX = X.slice(seperationSize);
   let testSetY = y.slice(seperationSize);
 
-  let knnModel = new KNN(trainingSetX, trainingSetY, { k: 7 });
+  let benchmarkStart = performance.now();
+  let knnModel = new KNN(trainingSetX, trainingSetY, { k: 5 });
+  let benchmarkEnd = performance.now();
 
   const result = knnModel.predict(testSetX);
   const misclassifications = result.filter((el, i) => el !== testSetY[i])
     .length;
 
-  console.log(
-    `Test Set Size = ${
-      testSetX.length
-    } and number of Misclassifications = ${misclassifications}`
-  );
+  const log = [
+    `Test Set Size = ${testSetX.length}`,
+    `Number of Misclassifications = ${misclassifications}`,
+    `Time: ${benchmarkEnd - benchmarkStart} ms`
+  ];
 
   const chartData = testSetX.map((el, i) => ({
     ...keysHead.reduce(
@@ -102,6 +104,17 @@ export const KNearestNeighbours = ({ data }) => {
               </ScatterChart>
             );
           })}
+          <div
+            style={{
+              position: "absolute",
+              background: "#ffffff",
+              padding: "10px"
+            }}
+          >
+            {log.map(el => (
+              <p>{el}</p>
+            ))}
+          </div>
         </div>
       )}
     </AutoSizer>
