@@ -17,7 +17,6 @@ export const LinearRegression = ({ data, seriesKey, labelKey }) => {
     (acc, el) => [[...acc[0], el[labelKey]], [...acc[1], el[seriesKey]]],
     [[], []]
   );
-  console.log(X, y);
   let regressionModel = new SLR(X, y);
   let predictionLabel = `${seriesKey}PredictedBy${
     labelKey[0].toUpperCase()

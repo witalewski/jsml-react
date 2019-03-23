@@ -12,15 +12,6 @@ import {
 import KNN from "ml-knn";
 import { colors } from "../utils/colors";
 
-const data = [
-  { x: 100, y: 200, z: 200 },
-  { x: 120, y: 100, z: 260 },
-  { x: 170, y: 300, z: 400 },
-  { x: 140, y: 250, z: 280 },
-  { x: 150, y: 400, z: 500 },
-  { x: 110, y: 280, z: 200 }
-];
-
 const shuffleArray = arr => {
   let targetArr = [...arr];
   for (var i = targetArr.length - 1; i > 0; i--) {
@@ -57,7 +48,6 @@ export const KNearestNeighbours = ({ data }) => {
   const misclassifications = result.filter((el, i) => el !== testSetY[i])
     .length;
 
-  console.clear();
   console.log(
     `Test Set Size = ${
       testSetX.length
@@ -75,7 +65,6 @@ export const KNearestNeighbours = ({ data }) => {
     [keysTail]: types[result[i]]
   }));
 
-  console.log(chartData);
   let subChartsIndices = keysHead.map((_, i) => i).filter(i => i % 2 === 0);
 
   return (
